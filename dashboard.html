@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Ronald Psicólogo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #1B3A5C;
+    --teal: #4A9B8E;
+    --teal-light: #E6F5F3;
+    --teal-mid: #B8E0DB;
+    --warm: #E8A87C;
+    --warm-light: #FDF3EB;
+    --surface: #F0F2F5;
+    --white: #FFFFFF;
+    --text-primary: #1A2332;
+    --text-secondary: #4A5568;
+    --text-muted: #8896A8;
+    --border: #E2E8F0;
+    --red: #EF4444;
+    --red-light: #FEF2F2;
+    --green: #22C55E;
+    --green-light: #F0FDF4;
+    --amber: #F59E0B;
+    --amber-light: #FFFBEB;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --sidebar-w: 240px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text-primary); display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--navy);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0;
+    z-index: 200;
+  }
+  .sidebar-brand {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo {
+    width: 36px; height: 36px;
+    background: var(--teal);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .sidebar-brand-text { font-family: 'DM Serif Display', serif; font-size: 16px; color: white; }
+  .sidebar-brand-sub { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .nav-section-label {
+    padding: 12px 20px 6px;
+    font-size: 10px; font-weight: 600;
+    color: rgba(255,255,255,0.35); letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px;
+    color: rgba(255,255,255,0.65);
+    cursor: pointer; font-size: 13px; font-weight: 500;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: white; background: rgba(255,255,255,0.08); }
+  .nav-item.active { color: white; background: rgba(74,155,142,0.2); border-left-color: var(--teal); }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--teal);
+    color: white;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 10px;
+    min-width: 20px; text-align: center;
+  }
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .user-pill {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 34px; height: 34px;
+    background: var(--teal);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: white;
+  }
+  .user-name { font-size: 13px; font-weight: 500; color: white; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+  /* MAIN */
+  .main-area {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-sm {
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s; border: 1px solid var(--border);
+    background: var(--white); color: var(--text-secondary);
+  }
+  .btn-sm:hover { border-color: var(--teal); color: var(--teal); }
+  .btn-sm.primary { background: var(--teal); color: white; border-color: var(--teal); }
+  .btn-sm.primary:hover { background: #3a8a7d; }
+  .btn-sm.danger { background: var(--red); color: white; border-color: var(--red); }
+  .btn-sm.danger:hover { background: #dc2626; }
+
+  .page-content { padding: 28px; flex: 1; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* METRICS */
+  .metrics-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;
+  }
+  .metric-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px;
+  }
+  .metric-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .metric-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .metric-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .metric-icon.teal { background: var(--teal-light); color: var(--teal); }
+  .metric-icon.navy { background: #E8F0F8; color: var(--navy); }
+  .metric-icon.amber { background: var(--amber-light); color: var(--amber); }
+  .metric-icon.green { background: var(--green-light); color: var(--green); }
+  .metric-value { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--text-primary); margin-bottom: 4px; }
+  .metric-sub { font-size: 11px; color: var(--text-muted); }
+  .metric-trend { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 500; }
+  .metric-trend.up { color: var(--green); }
+  .metric-trend.down { color: var(--red); }
+
+  /* TABLES */
+  .section-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .section-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .section-card-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600; color: var(--text-primary);
+  }
+  .section-card-title i { color: var(--teal); }
+
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  }
+  .filter-select {
+    padding: 6px 10px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
+    font-size: 12px; color: var(--text-secondary); background: var(--white);
+    cursor: pointer;
+  }
+  input.search-input {
+    padding: 6px 10px 6px 30px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
+    font-size: 12px; color: var(--text-primary); background: var(--white);
+    outline: none; width: 180px;
+  }
+  input.search-input:focus { border-color: var(--teal); }
+  .search-wrapper { position: relative; }
+  .search-wrapper i { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 10px 16px; text-align: left;
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    letter-spacing: 0.5px; text-transform: uppercase;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #FAFBFC; }
+  td { padding: 12px 16px; font-size: 13px; color: var(--text-secondary); vertical-align: middle; }
+  td strong { color: var(--text-primary); font-weight: 500; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+  }
+  .badge.pendiente { background: var(--amber-light); color: #92400E; }
+  .badge.confirmada { background: var(--teal-light); color: #1A5C54; }
+  .badge.completada { background: var(--green-light); color: #166534; }
+  .badge.cancelada { background: var(--red-light); color: #991B1B; }
+  .badge.pagado { background: var(--green-light); color: #166534; }
+  .badge.sin-pago { background: var(--amber-light); color: #92400E; }
+
+  .action-btn {
+    padding: 4px 8px; border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 11px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: all 0.15s; margin-right: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+  .action-btn.edit { background: var(--teal-light); color: var(--teal); }
+  .action-btn.edit:hover { background: var(--teal); color: white; }
+  .action-btn.cancel { background: var(--red-light); color: var(--red); }
+  .action-btn.cancel:hover { background: var(--red); color: white; }
+  .action-btn.confirm { background: var(--green-light); color: var(--green); }
+  .action-btn.confirm:hover { background: var(--green); color: white; }
+  .action-btn.view { background: var(--surface); color: var(--text-secondary); }
+  .action-btn.view:hover { background: var(--navy); color: white; }
+
+  .meet-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: #1a56db; text-decoration: none;
+    padding: 3px 8px; background: #EBF5FF; border-radius: 4px;
+  }
+  .meet-link:hover { background: #DBEAFE; }
+
+  /* CALENDAR VIEW */
+  .cal-view-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+  }
+  .cal-view-header {
+    text-align: center; font-size: 11px; font-weight: 600;
+    color: var(--text-muted); padding: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .cal-view-day {
+    min-height: 80px; padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    cursor: pointer; transition: border-color 0.15s;
+    position: relative;
+  }
+  .cal-view-day:hover { border-color: var(--teal); }
+  .cal-view-day.blocked-day { background: var(--red-light); border-color: #FCA5A5; cursor: default; }
+  .cal-view-day.today-mark { border-color: var(--teal); }
+  .day-num {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-secondary); margin-bottom: 4px;
+  }
+  .day-apt {
+    font-size: 9px; padding: 2px 4px;
+    border-radius: 3px; margin-bottom: 2px;
+    font-weight: 500; cursor: pointer;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .day-apt.confirmada { background: var(--teal-light); color: #1A5C54; }
+  .day-apt.pendiente { background: var(--amber-light); color: #92400E; }
+  .day-apt.completada { background: var(--green-light); color: #166534; }
+  .day-apt.cancelada { background: var(--red-light); color: #991B1B; }
+  .more-apts { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+
+  /* BLOCK PANEL */
+  .block-panel {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  .block-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+  }
+  .block-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+  .weekday-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .weekday-btn {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; font-family: 'Inter', sans-serif;
+    color: var(--text-secondary); background: var(--white);
+  }
+  .weekday-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .weekday-btn.blocked { background: var(--red); color: white; border-color: var(--red); }
+  .hour-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .hour-btn {
+    padding: 7px; text-align: center;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    transition: all 0.15s; font-family: 'Inter', sans-serif;
+    color: var(--text-secondary); background: var(--white);
+  }
+  .hour-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .hour-btn.blocked { background: var(--red); color: white; border-color: var(--red); }
+  .date-block-list { margin-top: 12px; }
+  .date-block-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; background: var(--red-light);
+    border-radius: var(--radius-sm); margin-bottom: 6px;
+    font-size: 12px; color: #991B1B;
+  }
+  .date-remove {
+    background: none; border: none; cursor: pointer; color: var(--red);
+    display: flex; align-items: center;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(27,58,92,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    max-width: 520px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .modal-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+  .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; }
+  .modal-close:hover { color: var(--text-primary); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+  input, textarea, select {
+    padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
+    font-size: 13px; color: var(--text-primary); background: var(--white);
+    outline: none; transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--teal); }
+  textarea { resize: vertical; min-height: 70px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+  /* CANCEL WIZARD */
+  .cancel-info {
+    background: var(--red-light); border: 1px solid #FCA5A5;
+    border-radius: var(--radius-md); padding: 12px; margin-bottom: 16px;
+  }
+  .cancel-info p { font-size: 12px; color: #991B1B; }
+  .wa-preview {
+    background: #DCF8C6; border-radius: var(--radius-md);
+    padding: 12px; font-size: 12px; line-height: 1.6;
+    white-space: pre-wrap; color: #075E54;
+    margin-top: 8px; font-family: monospace;
+  }
+
+  /* CHARTS */
+  .charts-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .chart-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+  .chart-card h3 { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--navy); color: white;
+    padding: 10px 16px; border-radius: var(--radius-md);
+    font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s ease; z-index: 3000;
+    box-shadow: 0 8px 24px rgba(27,58,92,0.2);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+  .empty-state i { margin-bottom: 12px; color: var(--border); }
+  .empty-state p { font-size: 14px; }
+
+  /* WHATSAPP PARSER */
+  .parser-area { padding: 20px; }
+  .drop-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius-md);
+    padding: 40px; text-align: center; cursor: pointer;
+    color: var(--text-muted); transition: all 0.2s; margin-bottom: 16px;
+  }
+  .drop-zone:hover { border-color: var(--teal); color: var(--teal); }
+  .drop-zone input { display: none; }
+  .parsed-result {
+    background: var(--surface); border-radius: var(--radius-md);
+    padding: 16px; font-size: 12px; color: var(--text-secondary);
+  }
+  .parsed-row { display: flex; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .parsed-row:last-child { border-bottom: none; }
+  .parsed-key { font-weight: 600; color: var(--text-primary); min-width: 120px; }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .sidebar-brand-text, .sidebar-brand-sub, .nav-item span, .nav-section-label, .user-name, .user-role { display: none; }
+    .nav-badge { display: none; }
+    .nav-item { justify-content: center; padding: 12px; }
+    .main-area { margin-left: 60px; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .block-panel { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo"><i data-lucide="brain" width="18" height="18"></i></div>
+    <div>
+      <div class="sidebar-brand-text">Ronald</div>
+      <div class="sidebar-brand-sub">Dashboard</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a class="nav-item active" onclick="showPage('overview', this)">
+      <i data-lucide="layout-dashboard" width="16" height="16"></i>
+      <span>Resumen</span>
+    </a>
+    <a class="nav-item" onclick="showPage('calendar', this)">
+      <i data-lucide="calendar" width="16" height="16"></i>
+      <span>Calendario</span>
+    </a>
+    <a class="nav-item" onclick="showPage('appointments', this)">
+      <i data-lucide="calendar-check" width="16" height="16"></i>
+      <span>Citas</span>
+      <span class="nav-badge" id="pendingBadge">0</span>
+    </a>
+    <div class="nav-section-label">Gestión</div>
+    <a class="nav-item" onclick="showPage('patients', this)">
+      <i data-lucide="users" width="16" height="16"></i>
+      <span>Pacientes</span>
+    </a>
+    <a class="nav-item" onclick="showPage('blocking', this)">
+      <i data-lucide="shield-off" width="16" height="16"></i>
+      <span>Bloqueos</span>
+    </a>
+    <a class="nav-item" onclick="showPage('payments', this)">
+      <i data-lucide="credit-card" width="16" height="16"></i>
+      <span>Pagos</span>
+    </a>
+    <a class="nav-item" onclick="showPage('whatsapp', this)">
+      <i data-lucide="message-circle" width="16" height="16"></i>
+      <span>WhatsApp Parser</span>
+    </a>
+    <div class="nav-section-label">Ajustes</div>
+    <a class="nav-item" onclick="showPage('settings', this)">
+      <i data-lucide="settings" width="16" height="16"></i>
+      <span>Configuración</span>
+    </a>
+    <a class="nav-item" href="index.html" style="text-decoration:none">
+      <i data-lucide="external-link" width="16" height="16"></i>
+      <span>Ver sitio</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">R</div>
+      <div>
+        <div class="user-name">Ronald</div>
+        <div class="user-role">Psicólogo</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-area">
+  <header class="topbar">
+    <div class="topbar-title" id="topbarTitle">Resumen general</div>
+    <div class="topbar-actions">
+      <span style="font-size:12px;color:var(--text-muted)" id="currentDateLabel"></span>
+      <button class="btn-sm primary" onclick="openNewAppointmentModal()">
+        <i data-lucide="plus" width="12" height="12"></i>
+        Nueva cita
+      </button>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- OVERVIEW PAGE -->
+    <div class="page active" id="page-overview">
+      <div class="metrics-grid" id="metricsGrid"></div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3><i data-lucide="bar-chart-2" width="14" height="14"></i> Citas por semana</h3>
+          <canvas id="weeklyChart" height="160"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3><i data-lucide="pie-chart" width="14" height="14"></i> Por estado</h3>
+          <canvas id="statusChart" height="160"></canvas>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title">
+            <i data-lucide="clock" width="15" height="15"></i>
+            Citas recientes
+          </div>
+          <button class="btn-sm" onclick="showPage('appointments', document.querySelector('.nav-item:nth-child(5)'))">Ver todas</button>
+        </div>
+        <table>
+          <thead><tr><th>Paciente</th><th>Fecha</th><th>Servicio</th><th>Estado</th><th>Pago</th><th>Acciones</th></tr></thead>
+          <tbody id="recentAptsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CALENDAR PAGE -->
+    <div class="page" id="page-calendar">
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title">
+            <i data-lucide="calendar" width="15" height="15"></i>
+            <span id="calViewLabel">Junio 2026</span>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm" onclick="changeCalView(-1)"><i data-lucide="chevron-left" width="12" height="12"></i></button>
+            <button class="btn-sm" onclick="changeCalView(1)"><i data-lucide="chevron-right" width="12" height="12"></i></button>
+          </div>
+        </div>
+        <div style="padding:16px">
+          <div class="cal-view-grid" id="calViewDayLabels"></div>
+          <div style="height:8px"></div>
+          <div class="cal-view-grid" id="calViewGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS PAGE -->
+    <div class="page" id="page-appointments">
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title">
+            <i data-lucide="calendar-check" width="15" height="15"></i>
+            Todas las citas
+          </div>
+          <div class="filter-bar">
+            <div class="search-wrapper">
+              <i data-lucide="search" width="12" height="12"></i>
+              <input class="search-input" type="text" placeholder="Buscar paciente..." id="aptSearch" oninput="renderAptTable()">
+            </div>
+            <select class="filter-select" id="aptStatusFilter" onchange="renderAptTable()">
+              <option value="">Todos los estados</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="confirmada">Confirmada</option>
+              <option value="completada">Completada</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+            <select class="filter-select" id="aptPayFilter" onchange="renderAptTable()">
+              <option value="">Todo pago</option>
+              <option value="pagado">Pagado</option>
+              <option value="pendiente">Sin pago</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Paciente</th><th>Fecha / Hora</th><th>Servicio</th><th>Estado</th><th>Pago</th><th>Meet</th><th>Acciones</th></tr></thead>
+          <tbody id="aptsTbody"></tbody>
+        </table>
+        <div id="aptsEmptyState" class="empty-state" style="display:none">
+          <i data-lucide="calendar-x" width="40" height="40"></i>
+          <p>No hay citas con esos filtros</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATIENTS PAGE -->
+    <div class="page" id="page-patients">
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title"><i data-lucide="users" width="15" height="15"></i> Pacientes</div>
+          <div class="filter-bar">
+            <div class="search-wrapper">
+              <i data-lucide="search" width="12" height="12" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-muted)"></i>
+              <input class="search-input" type="text" placeholder="Buscar paciente..." id="patientSearch" oninput="renderPatients()">
+            </div>
+          </div>
+        </div>
+        <div id="patientsGrid" style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
+      </div>
+    </div>
+
+    <!-- BLOCKING PAGE -->
+    <div class="page" id="page-blocking">
+      <div class="block-panel">
+        <div class="block-card">
+          <h3><i data-lucide="calendar-x" width="16" height="16" style="color:var(--red)"></i> Días de semana bloqueados</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Haz clic para bloquear/desbloquear. Los días bloqueados <strong>cancelan automáticamente</strong> las citas existentes.</p>
+          <div class="weekday-grid" id="weekdayGrid"></div>
+        </div>
+        <div class="block-card">
+          <h3><i data-lucide="clock-off" width="16" height="16" style="color:var(--red)"></i> Horas bloqueadas</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Bloquea franjas horarias para todos los días.</p>
+          <div class="hour-grid" id="hourGrid"></div>
+        </div>
+        <div class="block-card" style="grid-column:1/-1">
+          <h3><i data-lucide="ban" width="16" height="16" style="color:var(--red)"></i> Fechas específicas bloqueadas</h3>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input type="date" id="blockDateInput" style="flex:1">
+            <input type="text" id="blockDateReason" placeholder="Motivo (opcional)" style="flex:2">
+            <button class="btn-sm primary" onclick="addBlockedDate()">
+              <i data-lucide="plus" width="12" height="12"></i>
+              Bloquear
+            </button>
+          </div>
+          <div class="date-block-list" id="blockedDatesList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS PAGE -->
+    <div class="page" id="page-payments">
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title"><i data-lucide="credit-card" width="15" height="15"></i> Registro de pagos</div>
+        </div>
+        <table>
+          <thead><tr><th>Paciente</th><th>Fecha cita</th><th>Monto</th><th>Método</th><th>Referencia</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="paymentsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WHATSAPP PARSER PAGE -->
+    <div class="page" id="page-whatsapp">
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title"><i data-lucide="message-circle" width="15" height="15"></i> Parser de pagos WhatsApp</div>
+        </div>
+        <div class="parser-area">
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Pega o sube el texto de un mensaje de WhatsApp con confirmación de pago (SINPE, BAC, etc.) para extraer automáticamente los datos y registrar el pago.</p>
+          <div class="drop-zone" onclick="document.getElementById('waFile').click()">
+            <i data-lucide="upload-cloud" width="28" height="28" style="color:var(--text-muted);margin-bottom:8px"></i>
+            <p>Subir screenshot o archivo de texto del mensaje</p>
+            <p style="font-size:11px;margin-top:4px">O pega el texto abajo</p>
+            <input type="file" id="waFile" accept="image/*,.txt" onchange="handleWaFile(event)">
+          </div>
+          <textarea id="waText" placeholder="Pega aquí el texto del mensaje de WhatsApp con la confirmación de pago...
+Ej: SINPE Móvil - Transferencia exitosa. Monto: ₡45,000. Ref: 123456. De: Juan Pérez (+506 8888-8888) Para: Ronald..." style="width:100%;margin-bottom:12px;height:120px"></textarea>
+          <button class="btn-sm primary" onclick="parseWhatsApp()" style="margin-bottom:20px">
+            <i data-lucide="scan-text" width="12" height="12"></i>
+            Analizar mensaje
+          </button>
+          <div id="parsedOutput" style="display:none" class="parsed-result">
+            <div style="font-weight:600;margin-bottom:10px;color:var(--text-primary)">Datos extraídos:</div>
+            <div id="parsedRows"></div>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <button class="btn-sm primary" onclick="saveParsedPayment()">
+                <i data-lucide="check" width="12" height="12"></i>
+                Guardar como pago
+              </button>
+              <button class="btn-sm" onclick="document.getElementById('parsedOutput').style.display='none'">Descartar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title"><i data-lucide="settings" width="15" height="15"></i> Configuración</div>
+        </div>
+        <div style="padding:20px;max-width:500px">
+          <div style="margin-bottom:20px">
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Número WhatsApp del psicólogo</label>
+            <input type="tel" id="settingWaNumber" placeholder="+50688888888" style="width:100%">
+            <p style="font-size:11px;color:var(--text-muted);margin-top:4px">Número donde recibirás las notificaciones de nuevas citas</p>
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Mensaje de cancelación por defecto</label>
+            <textarea id="settingCancelMsg" style="width:100%;height:100px">Hola {nombre}, te informamos que tu cita agendada para el {fecha} a las {hora} ha sido cancelada. Lamentamos los inconvenientes. Por favor contáctanos para reagendar.</textarea>
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Nombre del psicólogo</label>
+            <input type="text" id="settingName" value="Ronald" style="width:100%">
+          </div>
+          <button class="btn-sm primary" onclick="saveSettings()">
+            <i data-lucide="save" width="12" height="12"></i>
+            Guardar configuración
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- PATIENT DETAIL MODAL -->
+<div class="modal-overlay" id="patientDetailModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title">Detalle del paciente</div>
+      <button class="modal-close" onclick="closeModal('patientDetailModal')"><i data-lucide="x" width="18" height="18"></i></button>
+    </div>
+    <div id="patientDetailContent"></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('patientDetailModal')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT APPOINTMENT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="editModalTitle">Editar cita</div>
+      <button class="modal-close" onclick="closeModal('editModal')"><i data-lucide="x" width="18" height="18"></i></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre paciente</label>
+        <input type="text" id="editNombre">
+      </div>
+      <div class="form-group">
+        <label>Correo</label>
+        <input type="email" id="editCorreo">
+      </div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" id="editTelefono">
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="editEstado">
+          <option value="pendiente">Pendiente</option>
+          <option value="confirmada">Confirmada</option>
+          <option value="completada">Completada</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="editFecha">
+      </div>
+      <div class="form-group">
+        <label>Hora</label>
+        <input type="time" id="editHora">
+      </div>
+      <div class="form-group">
+        <label>Link Google Meet</label>
+        <input type="text" id="editMeet">
+      </div>
+      <div class="form-group">
+        <label>Estado pago</label>
+        <select id="editPago">
+          <option value="pendiente">Pendiente</option>
+          <option value="enviado">Enviado</option>
+          <option value="confirmado">Confirmado</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Nota del psicólogo</label>
+        <textarea id="editNotaPsi"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('editModal')">Cancelar</button>
+      <button class="btn-sm primary" onclick="saveEditAppointment()">
+        <i data-lucide="save" width="12" height="12"></i>
+        Guardar cambios
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CANCEL MODAL -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Cancelar cita</div>
+      <button class="modal-close" onclick="closeModal('cancelModal')"><i data-lucide="x" width="18" height="18"></i></button>
+    </div>
+    <div class="cancel-info">
+      <p id="cancelAptInfo">Se cancelará la cita de <strong>—</strong></p>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Mensaje personalizado de WhatsApp</label>
+      <textarea id="cancelMsgText" style="height:120px"></textarea>
+    </div>
+    <div>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Vista previa del mensaje:</p>
+      <div class="wa-preview" id="cancelPreview"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('cancelModal')">Volver</button>
+      <button class="btn-sm danger" onclick="confirmCancel()">
+        <i data-lucide="x-circle" width="12" height="12"></i>
+        Cancelar cita + Notificar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW APPOINTMENT MODAL -->
+<div class="modal-overlay" id="newAptModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva cita manual</div>
+      <button class="modal-close" onclick="closeModal('newAptModal')"><i data-lucide="x" width="18" height="18"></i></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="newNombre"></div>
+      <div class="form-group"><label>Correo</label><input type="email" id="newCorreo"></div>
+      <div class="form-group"><label>Teléfono *</label><input type="tel" id="newTelefono"></div>
+      <div class="form-group">
+        <label>Servicio</label>
+        <select id="newServicio">
+          <option value="Terapia Individual">Terapia Individual</option>
+          <option value="Primera Consulta">Primera Consulta</option>
+          <option value="Terapia de Pareja">Terapia de Pareja</option>
+          <option value="Terapia de Seguimiento">Terapia de Seguimiento</option>
+          <option value="Evaluación Psicológica">Evaluación Psicológica</option>
+          <option value="Crisis / Urgencia">Crisis / Urgencia</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Fecha *</label><input type="date" id="newFecha"></div>
+      <div class="form-group"><label>Hora *</label><input type="time" id="newHora" value="09:00"></div>
+      <div class="form-group full"><label>Nota / motivo</label><textarea id="newNota"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('newAptModal')">Cancelar</button>
+      <button class="btn-sm primary" onclick="saveNewAppointment()">
+        <i data-lucide="plus" width="12" height="12"></i>
+        Crear cita
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <i data-lucide="check" width="13" height="13"></i>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ============ STATE ============
+let currentPage = 'overview';
+let calViewMonth = new Date();
+let editingAptId = null;
+let cancelingAptId = null;
+let parsedPaymentData = null;
+
+const WEEKDAYS = ['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+const HOURS = ['08:00','09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00'];
+const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function getApts() { return JSON.parse(localStorage.getItem('rp_appointments') || '[]'); }
+function saveApts(apts) { localStorage.setItem('rp_appointments', JSON.stringify(apts)); }
+function getConfig() { return JSON.parse(localStorage.getItem('rp_config') || '{"blockedWeekdays":[],"blockedHours":[],"waNumber":"+50688888888","cancelMsg":"Hola {nombre}, tu cita del {fecha} a las {hora} ha sido cancelada. Contáctanos para reagendar.","psicName":"Ronald"}'); }
+function saveConfig(c) { localStorage.setItem('rp_config', JSON.stringify(c)); }
+function getBlockedDates() { return JSON.parse(localStorage.getItem('rp_blocked_dates') || '[]'); }
+function saveBlockedDates(d) { localStorage.setItem('rp_blocked_dates', JSON.stringify(d)); }
+function getPayments() { return JSON.parse(localStorage.getItem('rp_payments') || '[]'); }
+function savePayments(p) { localStorage.setItem('rp_payments', JSON.stringify(p)); }
+
+// ============ NAV ============
+function showPage(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if (el) el.classList.add('active');
+  currentPage = page;
+  const titles = {overview:'Resumen general',calendar:'Calendario de citas',appointments:'Gestión de citas',patients:'Pacientes',blocking:'Bloqueos de agenda',payments:'Registro de pagos',whatsapp:'Parser WhatsApp',settings:'Configuración'};
+  document.getElementById('topbarTitle').textContent = titles[page] || '';
+  renderPage(page);
+}
+
+function renderPage(page) {
+  if (page === 'overview') renderOverview();
+  else if (page === 'calendar') renderCalView();
+  else if (page === 'appointments') renderAptTable();
+  else if (page === 'patients') renderPatients();
+  else if (page === 'blocking') renderBlocking();
+  else if (page === 'payments') renderPayments();
+  else if (page === 'settings') loadSettings();
+}
+
+// ============ OVERVIEW ============
+function renderOverview() {
+  const apts = getApts();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = formatDate(today);
+  const pending = apts.filter(a => a.estado === 'pendiente').length;
+  const todayApts = apts.filter(a => a.fecha === todayStr);
+  const thisMonthApts = apts.filter(a => a.fecha.startsWith(today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0')));
+  const revenue = thisMonthApts.filter(a => a.pago?.estado === 'confirmado').reduce((s,a) => s + (a.precio||0), 0);
+
+  document.getElementById('metricsGrid').innerHTML = `
+    <div class="metric-card">
+      <div class="metric-header"><div class="metric-label">CITAS HOY</div><div class="metric-icon teal"><i data-lucide="calendar" width="16" height="16"></i></div></div>
+      <div class="metric-value">${todayApts.length}</div>
+      <div class="metric-sub">${todayApts.filter(a=>a.estado==='confirmada').length} confirmadas</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-header"><div class="metric-label">PENDIENTES</div><div class="metric-icon amber"><i data-lucide="clock" width="16" height="16"></i></div></div>
+      <div class="metric-value">${pending}</div>
+      <div class="metric-sub">Requieren confirmación</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-header"><div class="metric-label">ESTE MES</div><div class="metric-icon navy"><i data-lucide="calendar-check" width="16" height="16"></i></div></div>
+      <div class="metric-value">${thisMonthApts.length}</div>
+      <div class="metric-sub">${thisMonthApts.filter(a=>a.estado==='completada').length} completadas</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-header"><div class="metric-label">INGRESOS MES</div><div class="metric-icon green"><i data-lucide="trending-up" width="16" height="16"></i></div></div>
+      <div class="metric-value">₡${(revenue/1000).toFixed(0)}K</div>
+      <div class="metric-sub">Pagos confirmados</div>
+    </div>
+  `;
+
+  document.getElementById('pendingBadge').textContent = pending;
+
+  // Recent
+  const tbody = document.getElementById('recentAptsTbody');
+  const recent = [...apts].sort((a,b) => b.id - a.id).slice(0, 8);
+  tbody.innerHTML = recent.length ? recent.map(a => aptRow(a)).join('') : `<tr><td colspan="6" class="empty-state" style="padding:32px">Sin citas registradas</td></tr>`;
+
+  renderCharts(apts);
+  lucide.createIcons();
+}
+
+function renderCharts(apts) {
+  // Weekly
+  const weekData = {};
+  const days = ['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
+  apts.forEach(a => {
+    const d = new Date(a.fecha + 'T12:00:00');
+    const day = days[(d.getDay() + 6) % 7];
+    weekData[day] = (weekData[day] || 0) + 1;
+  });
+  const wCtx = document.getElementById('weeklyChart');
+  if (wCtx._chartInstance) wCtx._chartInstance.destroy();
+  wCtx._chartInstance = new Chart(wCtx, {
+    type: 'bar',
+    data: { labels: days, datasets: [{ label: 'Citas', data: days.map(d => weekData[d]||0), backgroundColor: '#4A9B8E', borderRadius: 6 }] },
+    options: { responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,ticks:{stepSize:1}}, x:{grid:{display:false}} } }
+  });
+
+  // Status donut
+  const counts = { pendiente:0, confirmada:0, completada:0, cancelada:0 };
+  apts.forEach(a => { if(counts[a.estado]!==undefined) counts[a.estado]++; });
+  const sCtx = document.getElementById('statusChart');
+  if (sCtx._chartInstance) sCtx._chartInstance.destroy();
+  sCtx._chartInstance = new Chart(sCtx, {
+    type: 'doughnut',
+    data: { labels:['Pendiente','Confirmada','Completada','Cancelada'], datasets:[{data: Object.values(counts), backgroundColor:['#F59E0B','#4A9B8E','#22C55E','#EF4444'], borderWidth:0}] },
+    options: { responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}} }
+  });
+}
+
+// ============ APPOINTMENT TABLE ============
+function aptRow(a, showAll=true) {
+  const statusBadge = `<span class="badge ${a.estado}">${a.estado}</span>`;
+  const payBadge = a.pago?.estado === 'confirmado' ? `<span class="badge pagado">Pagado</span>` : `<span class="badge sin-pago">${a.pago?.metodo||'—'}</span>`;
+  const meet = a.meetLink ? `<a href="${a.meetLink}" target="_blank" class="meet-link"><i data-lucide="video" width="10" height="10"></i> Meet</a>` : '—';
+  return `<tr>
+    <td><strong>${a.cliente?.nombre||'—'}</strong><br><span style="font-size:11px;color:var(--text-muted)">${a.cliente?.telefono||''}</span></td>
+    <td>${a.fecha}<br><span style="font-size:11px;color:var(--text-muted)">${a.hora}</span></td>
+    <td>${a.servicio||'—'}</td>
+    <td>${statusBadge}</td>
+    <td>${payBadge}</td>
+    <td>${meet}</td>
+    <td>
+      ${a.estado !== 'cancelada' ? `<button class="action-btn edit" onclick="openEditModal(${a.id})"><i data-lucide="edit-2" width="10" height="10"></i> Editar</button>` : ''}
+      ${a.estado !== 'cancelada' && a.estado !== 'completada' ? `<button class="action-btn confirm" onclick="quickConfirm(${a.id})"><i data-lucide="check" width="10" height="10"></i> Confirmar</button>` : ''}
+      ${a.estado !== 'cancelada' ? `<button class="action-btn cancel" onclick="openCancelModal(${a.id})"><i data-lucide="x" width="10" height="10"></i> Cancelar</button>` : ''}
+    </td>
+  </tr>`;
+}
+
+function renderAptTable() {
+  const search = (document.getElementById('aptSearch')?.value || '').toLowerCase();
+  const statusFilter = document.getElementById('aptStatusFilter')?.value || '';
+  const payFilter = document.getElementById('aptPayFilter')?.value || '';
+  let apts = getApts().filter(a => {
+    const matchSearch = !search || a.cliente?.nombre?.toLowerCase().includes(search) || a.cliente?.correo?.toLowerCase().includes(search);
+    const matchStatus = !statusFilter || a.estado === statusFilter;
+    const matchPay = !payFilter || (payFilter === 'pagado' ? a.pago?.estado === 'confirmado' : a.pago?.estado !== 'confirmado');
+    return matchSearch && matchStatus && matchPay;
+  }).sort((a,b) => b.id - a.id);
+  const tbody = document.getElementById('aptsTbody');
+  const empty = document.getElementById('aptsEmptyState');
+  if (apts.length) {
+    tbody.innerHTML = apts.map(a => aptRow(a)).join('');
+    empty.style.display = 'none';
+  } else {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  }
+  lucide.createIcons();
+}
+
+function quickConfirm(id) {
+  const apts = getApts();
+  const apt = apts.find(a => a.id === id);
+  if (apt) { apt.estado = 'confirmada'; saveApts(apts); renderAptTable(); showToast('Cita confirmada'); }
+}
+
+// ============ EDIT MODAL ============
+function openEditModal(id) {
+  editingAptId = id;
+  const apt = getApts().find(a => a.id === id);
+  if (!apt) return;
+  document.getElementById('editNombre').value = apt.cliente?.nombre || '';
+  document.getElementById('editCorreo').value = apt.cliente?.correo || '';
+  document.getElementById('editTelefono').value = apt.cliente?.telefono || '';
+  document.getElementById('editEstado').value = apt.estado || 'pendiente';
+  document.getElementById('editFecha').value = apt.fecha || '';
+  document.getElementById('editHora').value = apt.hora || '';
+  document.getElementById('editMeet').value = apt.meetLink || '';
+  document.getElementById('editPago').value = apt.pago?.estado || 'pendiente';
+  document.getElementById('editNotaPsi').value = apt.notaPsicologo || '';
+  document.getElementById('editModalTitle').textContent = `Editando cita — ${apt.cliente?.nombre}`;
+  openModal('editModal');
+}
+
+function saveEditAppointment() {
+  const apts = getApts();
+  const idx = apts.findIndex(a => a.id === editingAptId);
+  if (idx === -1) return;
+  apts[idx].cliente.nombre = document.getElementById('editNombre').value;
+  apts[idx].cliente.correo = document.getElementById('editCorreo').value;
+  apts[idx].cliente.telefono = document.getElementById('editTelefono').value;
+  apts[idx].estado = document.getElementById('editEstado').value;
+  apts[idx].fecha = document.getElementById('editFecha').value;
+  apts[idx].hora = document.getElementById('editHora').value;
+  apts[idx].meetLink = document.getElementById('editMeet').value;
+  apts[idx].pago = apts[idx].pago || {};
+  apts[idx].pago.estado = document.getElementById('editPago').value;
+  apts[idx].notaPsicologo = document.getElementById('editNotaPsi').value;
+  saveApts(apts);
+  closeModal('editModal');
+  renderPage(currentPage);
+  showToast('Cita actualizada');
+}
+
+// ============ CANCEL MODAL ============
+function openCancelModal(id) {
+  cancelingAptId = id;
+  const apt = getApts().find(a => a.id === id);
+  if (!apt) return;
+  const cfg = getConfig();
+  document.getElementById('cancelAptInfo').innerHTML = `Se cancelará la cita de <strong>${apt.cliente?.nombre}</strong> del ${apt.fecha} a las ${apt.hora}`;
+  const defaultMsg = (cfg.cancelMsg || 'Hola {nombre}, tu cita del {fecha} a las {hora} ha sido cancelada.')
+    .replace('{nombre}', apt.cliente?.nombre || '')
+    .replace('{fecha}', apt.fecha)
+    .replace('{hora}', apt.hora);
+  document.getElementById('cancelMsgText').value = defaultMsg;
+  document.getElementById('cancelPreview').textContent = defaultMsg;
+  document.getElementById('cancelMsgText').addEventListener('input', e => {
+    document.getElementById('cancelPreview').textContent = e.target.value;
+  });
+  openModal('cancelModal');
+}
+
+function confirmCancel() {
+  const apts = getApts();
+  const idx = apts.findIndex(a => a.id === cancelingAptId);
+  if (idx === -1) return;
+  const apt = apts[idx];
+  apt.estado = 'cancelada';
+  saveApts(apts);
+  // Send WA
+  const msg = encodeURIComponent(document.getElementById('cancelMsgText').value);
+  const phone = (apt.cliente?.telefono || '').replace(/\D/g,'');
+  if (phone) window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+  closeModal('cancelModal');
+  renderPage(currentPage);
+  showToast('Cita cancelada y notificación enviada');
+}
+
+// ============ NEW APPOINTMENT ============
+function openNewAppointmentModal() {
+  const today = formatDate(new Date());
+  document.getElementById('newFecha').value = today;
+  openModal('newAptModal');
+}
+
+function saveNewAppointment() {
+  const nombre = document.getElementById('newNombre').value.trim();
+  const telefono = document.getElementById('newTelefono').value.trim();
+  const fecha = document.getElementById('newFecha').value;
+  const hora = document.getElementById('newHora').value;
+  if (!nombre || !fecha || !hora) { showToast('Completa nombre, fecha y hora'); return; }
+  const meetCode = genMeet();
+  const apt = {
+    id: Date.now(),
+    fecha, hora,
+    servicio: document.getElementById('newServicio').value,
+    precio: 45000,
+    estado: 'confirmada',
+    meetLink: `https://meet.google.com/${meetCode}`,
+    cliente: { nombre, correo: document.getElementById('newCorreo').value, telefono, nota: document.getElementById('newNota').value, titulo: 'Agendada manualmente' },
+    pago: { metodo: 'manual', estado: 'pendiente' },
+    createdAt: new Date().toISOString()
+  };
+  const apts = getApts(); apts.push(apt); saveApts(apts);
+  closeModal('newAptModal');
+  renderPage(currentPage);
+  showToast('Cita creada');
+}
+
+function genMeet() {
+  const c = 'abcdefghijklmnopqrstuvwxyz';
+  const s = n => Array.from({length:n},()=>c[Math.floor(Math.random()*c.length)]).join('');
+  return `${s(3)}-${s(4)}-${s(3)}`;
+}
+
+// ============ CALENDAR VIEW ============
+function renderCalView() {
+  const year = calViewMonth.getFullYear();
+  const month = calViewMonth.getMonth();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const apts = getApts();
+  const blockedDates = getBlockedDates();
+  const cfg = getConfig();
+
+  document.getElementById('calViewLabel').textContent = `${MONTH_NAMES[month]} ${year}`;
+
+  const dayLabels = document.getElementById('calViewDayLabels');
+  dayLabels.innerHTML = WEEKDAYS.map(d => `<div class="cal-view-header">${d}</div>`).join('');
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const grid = document.getElementById('calViewGrid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < firstDay; i++) { const el = document.createElement('div'); grid.appendChild(el); }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    const dateStr = formatDate(date);
+    const isWeekendBlocked = cfg.blockedWeekdays?.includes(date.getDay());
+    const isDateBlocked = blockedDates.some(b => b.date === dateStr);
+    const isToday = date.getTime() === today.getTime();
+    const dayApts = apts.filter(a => a.fecha === dateStr);
+
+    const el = document.createElement('div');
+    el.className = 'cal-view-day' + (isWeekendBlocked || isDateBlocked ? ' blocked-day' : '') + (isToday ? ' today-mark' : '');
+    let inner = `<div class="day-num">${d}</div>`;
+    dayApts.slice(0,3).forEach(a => {
+      inner += `<div class="day-apt ${a.estado}" onclick="openEditModal(${a.id})" title="${a.cliente?.nombre}">${a.hora} ${a.cliente?.nombre?.split(' ')[0]||''}</div>`;
+    });
+    if (dayApts.length > 3) inner += `<div class="more-apts">+${dayApts.length-3} más</div>`;
+    el.innerHTML = inner;
+    grid.appendChild(el);
+  }
+  lucide.createIcons();
+}
+
+function changeCalView(dir) {
+  calViewMonth.setMonth(calViewMonth.getMonth() + dir);
+  renderCalView();
+}
+
+// ============ PATIENTS ============
+// Psychology-themed picsum seeds
+const PSYCH_SEEDS = ['mindfulness','therapy','calm','wellness','nature','journal','reading','yoga','coffee','peace','garden','ocean','forest','mountain','sunrise'];
+
+function renderPatients() {
+  const apts = getApts();
+  const search = (document.getElementById('patientSearch')?.value||'').toLowerCase();
+  const byPhone = {};
+  apts.forEach(a => {
+    const key = a.cliente?.telefono?.replace(/\D/g,'') || a.cliente?.correo || String(a.id);
+    if (!byPhone[key]) byPhone[key] = { ...a.cliente, citas: [], key };
+    byPhone[key].citas.push(a);
+  });
+  let patients = Object.values(byPhone);
+  if (search) patients = patients.filter(p => (p.nombre||'').toLowerCase().includes(search) || (p.correo||'').toLowerCase().includes(search) || (p.telefono||'').includes(search));
+
+  const grid = document.getElementById('patientsGrid');
+  if (!patients.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);font-size:13px">${search ? 'Sin resultados para esa búsqueda.' : 'Sin pacientes registrados aún.'}</div>`;
+    return;
+  }
+  grid.innerHTML = patients.map((p, idx) => {
+    const lastApt = [...p.citas].sort((a,b) => b.fecha.localeCompare(a.fecha))[0];
+    const initials = (p.nombre||'?').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    const seed = PSYCH_SEEDS[idx % PSYCH_SEEDS.length];
+    const imgUrl = `https://picsum.photos/seed/${seed}/320/140`;
+    const completadas = p.citas.filter(c => c.estado === 'completada').length;
+    const pendientes = p.citas.filter(c => c.estado === 'pendiente').length;
+    return `
+    <div class="patient-card" onclick="openPatientDetail('${p.key}')" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.06)" onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'" onmouseleave="this.style.transform='';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.06)'">
+      <div style="height:100px;overflow:hidden;position:relative">
+        <img src="${imgUrl}" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(27,58,92,0.7),transparent)"></div>
+        <div style="position:absolute;bottom:8px;left:10px;display:flex;align-items:center;gap:8px">
+          <div style="width:32px;height:32px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;border:2px solid rgba(255,255,255,0.4)">${initials}</div>
+          <span style="color:white;font-size:13px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,0.4)">${p.nombre||'—'}</span>
+        </div>
+      </div>
+      <div style="padding:12px">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">${p.correo||p.telefono||'—'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span style="padding:3px 8px;background:var(--teal-light);color:#1A5C54;border-radius:20px;font-size:10px;font-weight:600">${p.citas.length} citas</span>
+          ${completadas > 0 ? `<span style="padding:3px 8px;background:#F0FDF4;color:#166534;border-radius:20px;font-size:10px;font-weight:600">${completadas} hechas</span>` : ''}
+          ${pendientes > 0 ? `<span style="padding:3px 8px;background:#FFFBEB;color:#92400E;border-radius:20px;font-size:10px;font-weight:600">${pendientes} pend.</span>` : ''}
+        </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:8px">Última: ${lastApt?.fecha||'—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function openPatientDetail(key) {
+  const apts = getApts();
+  const patientApts = apts.filter(a => {
+    const k = a.cliente?.telefono?.replace(/\D/g,'') || a.cliente?.correo || String(a.id);
+    return k === key;
+  });
+  if (!patientApts.length) return;
+  const p = patientApts[0].cliente;
+  const sorted = [...patientApts].sort((a,b) => b.fecha.localeCompare(a.fecha));
+  const idx = Object.keys((() => { const r={}; apts.forEach(a=>{const k=a.cliente?.telefono?.replace(/\D/g,'')||a.cliente?.correo||String(a.id);r[k]=1;}); return r; })()).indexOf(key);
+  const seed = PSYCH_SEEDS[Math.abs(idx) % PSYCH_SEEDS.length];
+
+  const completadas = patientApts.filter(c=>c.estado==='completada').length;
+  const pendientes = patientApts.filter(c=>c.estado==='pendiente').length;
+  const totalPagado = patientApts.filter(c=>c.pago?.estado==='pagado').reduce((s,c)=>s+(c.precio||0),0);
+
+  const initials = (p.nombre||'?').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('patientDetailContent').innerHTML = `
+    <div style="margin:-20px -20px 20px;height:140px;position:relative;overflow:hidden">
+      <img src="https://picsum.photos/seed/${seed}2/500/200" alt="" style="width:100%;height:100%;object-fit:cover">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(27,58,92,0.85),rgba(27,58,92,0.3))"></div>
+      <div style="position:absolute;bottom:14px;left:20px;display:flex;align-items:center;gap:12px">
+        <div style="width:46px;height:46px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:white;border:3px solid rgba(255,255,255,0.3)">${initials}</div>
+        <div>
+          <div style="color:white;font-size:16px;font-weight:600">${p.nombre||'—'}</div>
+          <div style="color:rgba(255,255,255,0.65);font-size:12px">${p.telefono||''}</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
+      <div style="text-align:center;padding:12px;background:var(--teal-light);border-radius:10px">
+        <div style="font-size:22px;font-weight:700;color:var(--teal)">${patientApts.length}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Total citas</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#F0FDF4;border-radius:10px">
+        <div style="font-size:22px;font-weight:700;color:#166534">${completadas}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Completadas</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#FFFBEB;border-radius:10px">
+        <div style="font-size:22px;font-weight:700;color:#92400E">${pendientes}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Pendientes</div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Información de contacto</div>
+      ${p.correo ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><i data-lucide="mail" width="13" height="13" style="color:var(--teal)"></i>${p.correo}</div>` : ''}
+      ${p.telefono ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><i data-lucide="phone" width="13" height="13" style="color:var(--teal)"></i>${p.telefono} <a href="https://wa.me/${(p.telefono||'').replace(/\D/g,'')}" target="_blank" style="margin-left:auto;padding:3px 8px;background:var(--teal-light);color:var(--teal);border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">WhatsApp →</a></div>` : ''}
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Historial de citas</div>
+      ${sorted.slice(0,5).map(a => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:13px;font-weight:500">${a.fecha} · ${a.hora} hrs</div>
+            <div style="font-size:11px;color:var(--text-muted)">${a.servicio||'—'}</div>
+          </div>
+          <span style="padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${a.estado==='completada'?'#F0FDF4':a.estado==='pendiente'?'#FFFBEB':'#FEF2F2'};color:${a.estado==='completada'?'#166534':a.estado==='pendiente'?'#92400E':'#991B1B'}">${a.estado}</span>
+        </div>`).join('')}
+    </div>`;
+  openModal('patientDetailModal');
+  lucide.createIcons();
+}
+
+// ============ BLOCKING ============
+function renderBlocking() {
+  const cfg = getConfig();
+  const blockedDates = getBlockedDates();
+
+  // Weekdays
+  const wGrid = document.getElementById('weekdayGrid');
+  wGrid.innerHTML = WEEKDAYS.map((d,i) => {
+    const blocked = cfg.blockedWeekdays?.includes(i);
+    return `<button class="weekday-btn ${blocked?'blocked':''}" onclick="toggleWeekday(${i})">${d}</button>`;
+  }).join('');
+
+  // Hours
+  const hGrid = document.getElementById('hourGrid');
+  hGrid.innerHTML = HOURS.map(h => {
+    const blocked = cfg.blockedHours?.includes(h);
+    return `<button class="hour-btn ${blocked?'blocked':''}" onclick="toggleHour('${h}')">${h}</button>`;
+  }).join('');
+
+  // Dates
+  const list = document.getElementById('blockedDatesList');
+  list.innerHTML = blockedDates.length ? blockedDates.map(b =>
+    `<div class="date-block-item">
+      <span><strong>${b.date}</strong> ${b.reason ? '— '+b.reason : ''}</span>
+      <button class="date-remove" onclick="removeBlockedDate('${b.date}')"><i data-lucide="x" width="12" height="12"></i></button>
+    </div>`
+  ).join('') : `<p style="font-size:12px;color:var(--text-muted)">Sin fechas bloqueadas</p>`;
+
+  lucide.createIcons();
+}
+
+function toggleWeekday(day) {
+  const cfg = getConfig();
+  cfg.blockedWeekdays = cfg.blockedWeekdays || [];
+  if (cfg.blockedWeekdays.includes(day)) {
+    cfg.blockedWeekdays = cfg.blockedWeekdays.filter(d => d !== day);
+  } else {
+    cfg.blockedWeekdays.push(day);
+    autoCancelByWeekday(day, cfg);
+  }
+  saveConfig(cfg);
+  renderBlocking();
+}
+
+function toggleHour(hour) {
+  const cfg = getConfig();
+  cfg.blockedHours = cfg.blockedHours || [];
+  if (cfg.blockedHours.includes(hour)) cfg.blockedHours = cfg.blockedHours.filter(h => h !== hour);
+  else { cfg.blockedHours.push(hour); autoCancelByHour(hour, cfg); }
+  saveConfig(cfg);
+  renderBlocking();
+}
+
+function addBlockedDate() {
+  const dateVal = document.getElementById('blockDateInput').value;
+  const reason = document.getElementById('blockDateReason').value;
+  if (!dateVal) { showToast('Selecciona una fecha'); return; }
+  const blockedDates = getBlockedDates();
+  if (blockedDates.some(b => b.date === dateVal)) { showToast('Fecha ya bloqueada'); return; }
+  blockedDates.push({ date: dateVal, reason });
+  saveBlockedDates(blockedDates);
+  autoCancelByDate(dateVal);
+  renderBlocking();
+  showToast('Fecha bloqueada. Citas afectadas canceladas.');
+}
+
+function removeBlockedDate(date) {
+  const blockedDates = getBlockedDates().filter(b => b.date !== date);
+  saveBlockedDates(blockedDates);
+  renderBlocking();
+}
+
+function autoCancelByWeekday(day, cfg) {
+  const apts = getApts();
+  const today = formatDate(new Date());
+  let count = 0;
+  apts.forEach(a => {
+    if (a.estado !== 'cancelada' && a.fecha >= today) {
+      const d = new Date(a.fecha + 'T12:00:00');
+      if (d.getDay() === day) { a.estado = 'cancelada'; count++; sendCancelWa(a, cfg); }
+    }
+  });
+  saveApts(apts);
+  if (count) showToast(`${count} citas canceladas automáticamente`);
+}
+
+function autoCancelByHour(hour, cfg) {
+  const apts = getApts();
+  const today = formatDate(new Date());
+  let count = 0;
+  apts.forEach(a => {
+    if (a.estado !== 'cancelada' && a.fecha >= today && a.hora === hour) {
+      a.estado = 'cancelada'; count++; sendCancelWa(a, cfg);
+    }
+  });
+  saveApts(apts);
+  if (count) showToast(`${count} citas en esa hora canceladas`);
+}
+
+function autoCancelByDate(date) {
+  const apts = getApts();
+  const cfg = getConfig();
+  let count = 0;
+  apts.forEach(a => {
+    if (a.estado !== 'cancelada' && a.fecha === date) { a.estado = 'cancelada'; count++; sendCancelWa(a, cfg); }
+  });
+  saveApts(apts);
+}
+
+function sendCancelWa(apt, cfg) {
+  const msg = (cfg.cancelMsg || 'Hola {nombre}, tu cita del {fecha} a las {hora} fue cancelada.')
+    .replace('{nombre}', apt.cliente?.nombre||'')
+    .replace('{fecha}', apt.fecha)
+    .replace('{hora}', apt.hora);
+  const phone = (apt.cliente?.telefono||'').replace(/\D/g,'');
+  if (phone) setTimeout(() => window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank'), 300);
+}
+
+// ============ PAYMENTS ============
+function renderPayments() {
+  const apts = getApts();
+  const payments = getPayments();
+  const all = [
+    ...apts.map(a => ({ source:'cita', id:a.id, nombre:a.cliente?.nombre, fecha:a.fecha, monto:a.precio, metodo:a.pago?.metodo, ref:a.pago?.referencia, estado:a.pago?.estado||'pendiente' })),
+    ...payments.map(p => ({ source:'wa', ...p }))
+  ].sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
+  const tbody = document.getElementById('paymentsTbody');
+  tbody.innerHTML = all.map(p =>
+    `<tr>
+      <td><strong>${p.nombre||'—'}</strong></td>
+      <td>${p.fecha||'—'}</td>
+      <td>₡${(p.monto||0).toLocaleString()}</td>
+      <td>${p.metodo||'—'}</td>
+      <td>${p.ref||'—'}</td>
+      <td><span class="badge ${p.estado==='confirmado'?'confirmada':p.estado==='enviado'?'pendiente':'sin-pago'}">${p.estado}</span></td>
+      <td>
+        ${p.estado !== 'confirmado' ? `<button class="action-btn confirm" onclick="confirmPayment(${p.id},'${p.source}')"><i data-lucide="check" width="10" height="10"></i> Confirmar</button>` : ''}
+      </td>
+    </tr>`
+  ).join('') || `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted)">Sin pagos registrados</td></tr>`;
+  lucide.createIcons();
+}
+
+function confirmPayment(id, source) {
+  if (source === 'cita') {
+    const apts = getApts();
+    const apt = apts.find(a => a.id === id);
+    if (apt) { apt.pago.estado = 'confirmado'; saveApts(apts); }
+  } else {
+    const pays = getPayments();
+    const pay = pays.find(p => p.id === id);
+    if (pay) { pay.estado = 'confirmado'; savePayments(pays); }
+  }
+  renderPayments();
+  showToast('Pago confirmado');
+}
+
+// ============ WHATSAPP PARSER ============
+function handleWaFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.type.startsWith('text')) {
+    const reader = new FileReader();
+    reader.onload = ev => { document.getElementById('waText').value = ev.target.result; };
+    reader.readAsText(file);
+  } else {
+    showToast('Para imágenes, copia el texto del mensaje manualmente');
+  }
+}
+
+function parseWhatsApp() {
+  const text = document.getElementById('waText').value;
+  if (!text) { showToast('Pega un texto primero'); return; }
+  const result = extractPaymentData(text);
+  parsedPaymentData = result;
+  const rows = document.getElementById('parsedRows');
+  rows.innerHTML = Object.entries(result).map(([k,v]) =>
+    `<div class="parsed-row"><span class="parsed-key">${k}</span><span>${v||'—'}</span></div>`
+  ).join('');
+  document.getElementById('parsedOutput').style.display = 'block';
+  lucide.createIcons();
+}
+
+function extractPaymentData(text) {
+  const result = { nombre:'', telefono:'', monto:'', referencia:'', fecha:'', metodo:'' };
+  const montoMatch = text.match(/₡\s?([\d,\.]+)/i) || text.match(/monto[:\s]*([\d,\.]+)/i) || text.match(/([\d,\.]+)\s*colones/i);
+  if (montoMatch) result.monto = '₡' + montoMatch[1].trim();
+  const refMatch = text.match(/ref(?:erencia)?[:\s]*([A-Z0-9\-]+)/i) || text.match(/n[uú]mero[:\s]*([A-Z0-9\-]+)/i);
+  if (refMatch) result.referencia = refMatch[1].trim();
+  const telMatch = text.match(/\+?506[\s\-]?[0-9]{4}[\s\-]?[0-9]{4}/) || text.match(/\(?\+?\d{10,15}\)?/);
+  if (telMatch) result.telefono = telMatch[0].trim();
+  const nameMatch = text.match(/de[:\s]+([A-ZÁÉÍÓÚ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚ][a-záéíóúñ]+)*)/);
+  if (nameMatch) result.nombre = nameMatch[1].trim();
+  const dateMatch = text.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/);
+  if (dateMatch) result.fecha = dateMatch[1].trim();
+  if (/sinpe/i.test(text)) result.metodo = 'SINPE Móvil';
+  else if (/transferencia/i.test(text)) result.metodo = 'Transferencia';
+  else if (/pago|payment/i.test(text)) result.metodo = 'Pago';
+  return result;
+}
+
+function saveParsedPayment() {
+  if (!parsedPaymentData) return;
+  const pays = getPayments();
+  const montoNum = parseInt((parsedPaymentData.monto||'0').replace(/\D/g,'')) || 0;
+  pays.push({ id: Date.now(), source:'wa', nombre: parsedPaymentData.nombre, telefono: parsedPaymentData.telefono, monto: montoNum, metodo: parsedPaymentData.metodo, ref: parsedPaymentData.referencia, fecha: parsedPaymentData.fecha, estado:'enviado' });
+  savePayments(pays);
+  document.getElementById('parsedOutput').style.display = 'none';
+  document.getElementById('waText').value = '';
+  showToast('Pago guardado desde WhatsApp');
+}
+
+// ============ SETTINGS ============
+function loadSettings() {
+  const cfg = getConfig();
+  document.getElementById('settingWaNumber').value = cfg.waNumber || '';
+  document.getElementById('settingCancelMsg').value = cfg.cancelMsg || '';
+  document.getElementById('settingName').value = cfg.psicName || 'Ronald';
+}
+function saveSettings() {
+  const cfg = getConfig();
+  cfg.waNumber = document.getElementById('settingWaNumber').value;
+  cfg.cancelMsg = document.getElementById('settingCancelMsg').value;
+  cfg.psicName = document.getElementById('settingName').value;
+  saveConfig(cfg);
+  showToast('Configuración guardada');
+}
+
+// ============ HELPERS ============
+function formatDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ============ INIT ============
+const now = new Date();
+document.getElementById('currentDateLabel').textContent = now.toLocaleDateString('es-CR', {weekday:'long',day:'numeric',month:'long'});
+renderOverview();
+lucide.createIcons();
+
+// Seed demo data if empty
+if (!getApts().length) {
+  const demo = [
+    {id:1, fecha:'2026-06-11', hora:'09:00', servicio:'Primera Consulta', precio:35000, estado:'confirmada', meetLink:'https://meet.google.com/abc-defg-hij', cliente:{nombre:'María González', correo:'maria@gmail.com', telefono:'+50688001122', nota:'Ansiedad laboral', titulo:'Primera sesión'}, pago:{metodo:'sinpe', referencia:'TX001', estado:'confirmado'}, createdAt:'2026-06-01T10:00:00Z'},
+    {id:2, fecha:'2026-06-12', hora:'14:00', servicio:'Terapia Individual', precio:45000, estado:'pendiente', meetLink:'https://meet.google.com/klm-nopq-rst', cliente:{nombre:'Carlos Mora', correo:'carlos@hotmail.com', telefono:'+50687654321', nota:'Depresión', titulo:'Seguimiento'}, pago:{metodo:'pendiente', referencia:'', estado:'pendiente'}, createdAt:'2026-06-02T11:00:00Z'},
+    {id:3, fecha:'2026-06-15', hora:'10:00', servicio:'Terapia de Pareja', precio:60000, estado:'confirmada', meetLink:'https://meet.google.com/uvw-xyz1-234', cliente:{nombre:'Ana y Pedro Jiménez', correo:'ana@correo.com', telefono:'+50686543210', nota:'Comunicación', titulo:'Terapia pareja'}, pago:{metodo:'transfer', referencia:'TX002', estado:'enviado'}, createdAt:'2026-06-03T09:00:00Z'},
+    {id:4, fecha:'2026-06-08', hora:'11:00', servicio:'Evaluación Psicológica', precio:80000, estado:'completada', meetLink:'https://meet.google.com/zzz-aaaa-bbb', cliente:{nombre:'Laura Ramírez', correo:'laura@gmail.com', telefono:'+50685432109', nota:'Evaluación laboral', titulo:'Evaluación'}, pago:{metodo:'sinpe', referencia:'TX003', estado:'confirmado'}, createdAt:'2026-05-30T08:00:00Z'},
+  ];
+  saveApts(demo);
+  renderOverview();
+}
+</script>
+</body>
+</html>
